@@ -2,10 +2,10 @@ import requests
 import xml.etree.ElementTree as ET
 import pandas as pd
 # 发送请求并获取XML内容
-url = "http://comment.bilibili.com/285921646.xml"
+url = ""#输入网址
 headers = {'User-Agent': 'Mozilla/5.0'}
 response = requests.get(url, headers=headers)
-response.raise_for_status()  # 检查请求是否成功
+response.raise_for_status() 
 xml_content = response.content.decode('utf-8')
 # 解析XML内容
 root = ET.fromstring(xml_content)
