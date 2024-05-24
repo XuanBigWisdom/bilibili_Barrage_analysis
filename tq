@@ -1,0 +1,16 @@
+import requests
+import xml.etree.ElementTree as ET
+import pandas as pd
+# 发送请求并获取XML内容
+url = "http://comment.bilibili.com/285921646.xml"
+headers = {'User-Agent': 'Mozilla/5.0'}
+response = requests.get(url, headers=headers)
+response.raise_for_status()  # 检查请求是否成功
+xml_content = response.content.decode('utf-8')
+# 解析XML内容
+root = ET.fromstring(xml_content)
+danmaku_texts = [d.text for d in root.findall('.//d')]
+# 将弹幕内容保存到Excel文件
+df = pd.DataFrame({'弹幕内容': danmaku_texts})
+df.to_excel('danmaku4.xlsx', index=False, encoding='utf_8_sig')  # 保存为Excel文件并处理中文编码
+print("弹幕数据已保存到 danmaku.xlsx")  
