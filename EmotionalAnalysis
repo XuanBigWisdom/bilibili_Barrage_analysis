@@ -1,0 +1,68 @@
+import pandas as pd
+import jieba
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+from snownlp import SnowNLP
+
+excel_file = 'danmaku4.xlsx'
+df = pd.read_excel(excel_file)
+danmaku_texts = df['弹幕内容'].tolist()
+dm_str = " ".join(danmaku_texts)
+words_list = jieba.lcut(dm_str)
+words_count = {}
+for word in words_list:
+    #if len(word) > 2:  # 过滤特别短的无意义单词
+    words_count[word] = words_count.get(word, 0) + 1
+
+words_freq = sorted(words_count.items(), key=lambda x: x[1], reverse=True)
+print("词频统计:")
+for word, freq in words_freq:
+    print(f"{word}: {freq}")
+
+mask_image_path = 'cloud_shape.png'
+mask = np.array(Image.open(mask_image_path))  # 确保有一个云形状的掩码图像
+
+# 创建词云图
+wordcloud = WordCloud(
+    background_color='white',
+    mask=mask,                  # 使用掩码图像
+    width=800,
+    height=600,
+    max_words=2000,
+    max_font_size=100,
+    min_font_size=10,
+    font_path='C:/Windows/Fonts/simhei.ttf',  # 设置为系统中存在的字体路径
+    prefer_horizontal=0.9,      # 尽量水平放置
+    relative_scaling=0.5,       # 调整词频与字号的关系
+    collocations=False,         # 避免重复单词
+    contour_color='steelblue'   # 添加轮廓颜色以增强效果
+).generate_from_frequencies(words_count)
+
+# 显示词云图
+plt.figure(figsize=(10, 8))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+
+# 保存词云图到文件
+output_image_path = 'yumu.png'
+wordcloud.to_file(output_image_path)
+print(f"词云图已保存到 {output_image_path}")
+
+# 情感分析
+positive = 0
+negative = 0
+for text in danmaku_texts:
+    s = SnowNLP(text)
+    if s.sentiments > 0.5:
+        positive += 1
+    else:
+        negative += 1
+total = positive + negative
+print(f"情感分析结果：")
+print(f"积极的弹幕数量: {positive} ({positive / total * 100:.2f}%)")
+print(f"消极的弹幕数量: {negative} ({negative / total * 100:.2f}%)")
+
+
